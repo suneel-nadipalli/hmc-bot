@@ -26,4 +26,8 @@ async def on_ready():
 async def ping(ctx):
     await ctx.send('Pong 2!')
 
+@herbie.command()
+async def hello(ctx):
+    await ctx.send(f"Hello {ctx.author}!")
+
 herbie.run(token, log_handler=handler, log_level=logging.DEBUG)
