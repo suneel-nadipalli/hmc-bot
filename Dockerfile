@@ -1,6 +1,6 @@
-FROM python:3.12
+FROM python:3.12-slim
 WORKDIR /hmc
-COPY requirements.txt /hmc/
+COPY requirements.txt .
 RUN pip install -r requirements.txt
-COPY . /hmc
+COPY . .
 CMD python main.py
