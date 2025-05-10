@@ -24,7 +24,7 @@ async def on_ready():
 
 @herbie.command()
 async def ping(ctx):
-    await ctx.send('Pong 2!')
+    await ctx.send('Pong!')
 
 @herbie.command()
 async def hello(ctx):
