@@ -43,7 +43,7 @@ async def ping(ctx):
 async def hello(ctx):
     await ctx.send(f"Hello {ctx.author}!")
 
-@bot.command(name="recommend")
+@herbie.command(name="recommend")
 async def recommend(ctx, *, query: str):
     await ctx.send(f"🔍 Searching for `{query}`...")
 
