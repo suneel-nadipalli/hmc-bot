@@ -12,6 +12,8 @@ class MovieSelectionView(discord.ui.View):
         self.user_id = user_id
         self.results = results
 
+        print(f"MovieSelectionView initialized with {len(results)} results.")
+
         for movie in results:
             label = f"{movie['title']} ({movie.get('release_year', 'N/A')})"
             self.add_item(MovieSelectButton(label, movie, movies_collection, user_id))
@@ -23,6 +25,8 @@ class MovieSelectButton(discord.ui.Button):
         self.movie = movie
         self.movies_collection = movies_collection  # ✅ fixed
         self.user_id = user_id
+
+        print(f"MovieSelectButton initialized with label: {label}")
 
     async def callback(self, interaction: discord.Interaction):
         if interaction.user.id != self.user_id:
@@ -36,7 +40,12 @@ class MovieSelectButton(discord.ui.Button):
         movie_id = self.movie["_id"]
         username = str(interaction.user.name)
 
+        print(f"User {username} selected movie ID: {movie_id}")
+
         doc = self.movies_collection.find_one({"_id": movie_id})
+
+        print(f"Document found: {doc}")
+
         if not doc:
             await interaction.followup.send("❌ Couldn’t find that movie in the database.")
             return
@@ -68,6 +77,8 @@ class MovieSelectButton(discord.ui.Button):
 
         updated_doc = self.movies_collection.find_one({"_id": movie_id})
         tally = updated_doc.get("tallies", 1)
+
+        print(f"Updated document: {updated_doc}")
 
         append_to_google_sheet(updated_doc)
 

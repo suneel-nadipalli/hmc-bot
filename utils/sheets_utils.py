@@ -23,6 +23,7 @@ gs_client = gspread.authorize(creds)
 # Sheet details
 SHEET_ID = os.getenv("GOOGLE_SHEETS_ID")
 SHEET_TAB_NAME = "Herbie's Rec List"
+
 sheet = gs_client.open_by_key(SHEET_ID).worksheet(SHEET_TAB_NAME)
 
 MONGO_URI = os.getenv("MONGO_URI")
@@ -52,6 +53,9 @@ def get_genre_names(genre_ids):
     return [g["name"] for g in genre_docs]
 
 def append_to_google_sheet(doc):
+
+    print(f"Appending to Google Sheet: {doc}")
+
     genre_names = get_genre_names(doc.get("genre_ids", []))
     language = get_language_name(doc.get("original_language", ""))
     runtime = format_runtime(doc.get("runtime"))
@@ -60,6 +64,7 @@ def append_to_google_sheet(doc):
     vote_average = doc.get("vote_average")
     rating_display = f"{round(vote_average, 1)} / 10" if isinstance(vote_average, (int, float)) else "N/A"
 
+    print("Gotten all data for Google Sheet.")
 
     row = [
         doc.get("title", "N/A"),
@@ -76,8 +81,23 @@ def append_to_google_sheet(doc):
         doc.get("last_recommended_by", "N/A")
     ]
 
-    try:
+    print("Row data prepared for Google Sheet.")
+
+    title = doc.get("title", "N/A")
+    found_cells = sheet.findall(title)  # Get all matching cells, if any
+
+    print(found_cells)
+
+    if found_cells:
+        print(f"Found {len(found_cells)} cells with title '{title}'.")
+        cell = found_cells[0]  # Use the first match
+        row_num = cell.row
+        print(f"📝 Found existing row for '{title}' at row {row_num}. Updating...")
+
+        sheet.update(f"A{row_num}:L{row_num}", [row])
+        print(f"✅ Updated row for '{title}'.")
+    else:
+        print(f"📝 No existing row found for '{title}'. Appending new row...")
         sheet.append_row(row)
-        print("✅ Google Sheet updated.")
-    except Exception as e:
-        print(f"🔥 Failed to update Google Sheet: {e}")
+        print(f"➕ Appended new row for '{title}'.")
+

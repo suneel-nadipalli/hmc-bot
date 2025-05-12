@@ -28,7 +28,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 intents.members = True
 
-herbie = commands.Bot(command_prefix='/', intents=intents)
+herbie = commands.Bot(command_prefix='!', intents=intents)
 
 @herbie.event
 async def on_ready():
@@ -51,18 +51,45 @@ async def rec(ctx, *, query: str):
     try:
         collection = mongo_client["recs"]["movies"]
 
-        results = atlas_fuzzy_title_search(query, collection, limit=5)
+        genre_collection = mongo_client["recs"]["genres"]
+
+        results = search_movies(query, collection, genre_collection, limit=5)
         
         if not results:
             await ctx.send("No results found.")
 
             return
 
-        view = MovieSelectionView(results, collection, ctx.author.id)
-        await ctx.send("🎬 Which movie did you mean?", view=view)
+        for idx, movie in enumerate(results, 1):
+            print(f"{idx}. {movie} ({type(movie)})")
+
+        embed = discord.Embed(
+            title="🎬 Which movie did you mean?",
+            description="Select one of the buttons below to record your recommendation.",
+            color=discord.Color.blue()
+        )
+
+        for i, movie in enumerate(results, 1):
+            title = movie.get("title", "Untitled")
+            year = movie.get("release_year", "N/A")
+            overview = movie.get("overview", "No overview available.")[:300]
+
+            embed.add_field(
+                name=f"{i}. {title} ({year})",
+                value=f"**Overview:** {overview}...",
+                inline=False
+            )
+
+        await ctx.send(
+            embed=embed,
+            view=MovieSelectionView(results, collection, ctx.author.id)
+        )
+
+        # view = MovieSelectionView(results, collection, ctx.author.id)
+        # await ctx.send("🎬 Which movie did you mean?", view=view)
 
     except Exception as e:
-        print(f"🔥 Atlas Search error: {e}")
+        print(f"Error: {e}")
         await ctx.send("❌ Mongo search failed.")
 
 @herbie.command()
