@@ -5,3 +5,6 @@ pandas
 numpy
 rapidfuzz
 pymongo[srv]
+gspread
+oauth2client
+Babel

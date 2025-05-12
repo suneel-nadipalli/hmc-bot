@@ -1,4 +1,5 @@
 def atlas_fuzzy_title_search(user_query, collection, limit=5):
+  
     pipeline = [
         {
             "$search": {
