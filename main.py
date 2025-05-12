@@ -1,4 +1,4 @@
-import discord, os, logging, sys, base64
+import discord, os, logging, sys
 
 sys.path.append("..")
 
@@ -13,12 +13,6 @@ from utils.bot_utils import *
 from utils.mongo_utils import *
 
 load_dotenv()
-
-# Decode and write the service account key file
-key_data = base64.b64decode(os.environ["GOOGLE_SHEETS_KEY_BASE64"])
-
-with open("service_account.json", "wb") as f:
-    f.write(key_data)
 
 token = os.getenv("DISCORD_TOKEN")
 

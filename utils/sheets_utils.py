@@ -1,4 +1,4 @@
-import gspread, os, sys
+import gspread, os, sys, base64, json
 from oauth2client.service_account import ServiceAccountCredentials
 from datetime import datetime
 from babel import Locale
@@ -9,9 +9,15 @@ from dotenv import load_dotenv
 
 from pymongo import MongoClient
 
+key_data = base64.b64decode(os.getenv("GOOGLE_SHEETS_KEY_BASE64")).decode("utf-8")
+
+# Parse as dictionary
+key_dict = json.loads(key_data)
+
 # Google Sheets setup (run once at startup)
 scope = ["https://spreadsheets.google.com/feeds", "https://www.googleapis.com/auth/drive"]
-creds = ServiceAccountCredentials.from_json_keyfile_name("service_account.json", scope)
+
+creds = ServiceAccountCredentials.from_json_keyfile_dict(key_dict, scope)
 gs_client = gspread.authorize(creds)
 
 # Sheet details
