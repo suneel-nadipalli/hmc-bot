@@ -64,6 +64,9 @@ def append_to_google_sheet(doc):
     vote_average = doc.get("vote_average")
     rating_display = f"{round(vote_average, 1)} / 10" if isinstance(vote_average, (int, float)) else "N/A"
 
+    watched = "Yes" if doc.get("watched") else "No"
+    watched_on = format_datetime(doc.get("watched_on")) if doc.get("watched_on") else "N/A"
+
     print("Gotten all data for Google Sheet.")
 
     row = [
@@ -78,7 +81,9 @@ def append_to_google_sheet(doc):
         ", ".join(doc.get("watch_providers", [])) or "N/A",
         doc.get("tallies", 0),
         last_recommended,
-        doc.get("last_recommended_by", "N/A")
+        doc.get("last_recommended_by", "N/A"),
+        watched,
+        watched_on 
     ]
 
     print("Row data prepared for Google Sheet.")
@@ -94,7 +99,7 @@ def append_to_google_sheet(doc):
         row_num = cell.row
         print(f"📝 Found existing row for '{title}' at row {row_num}. Updating...")
 
-        sheet.update(f"A{row_num}:L{row_num}", [row])
+        sheet.update(f"A{row_num}:N{row_num}", [row])
         print(f"✅ Updated row for '{title}'.")
     else:
         print(f"📝 No existing row found for '{title}'. Appending new row...")

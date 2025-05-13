@@ -51,3 +51,45 @@ def enrich_movie_data(movie_id):
 
     result = collection.update_one({"_id": movie_id}, update)
     print(f"✅ Updated movie {movie_id}: {result.modified_count} modified")
+
+def convert_tmdb_to_doc(tmdb_result):
+    # Map TMDb fields to your Mongo-style doc structure
+    return {
+        "_id": tmdb_result["id"],
+        "title": tmdb_result["title"],
+        "release_year": int(tmdb_result["release_date"][:4]) if "release_date" in tmdb_result else "N/A",
+        "overview": tmdb_result.get("overview", ""),
+        "vote_average": tmdb_result.get("vote_average", 0.0),
+        "original_language": tmdb_result.get("original_language", ""),
+        "genre_ids": tmdb_result.get("genre_ids", [])
+    }
+
+def search_tmdb(query, limit=5):
+    url = "https://api.themoviedb.org/3/search/movie"
+    params = {
+        "api_key": API_KEY,
+        "query": query,
+        "include_adult": False,
+        "language": "en-US",
+        "page": 1
+    }
+
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        data = response.json()
+
+        time.sleep(0.2)
+
+        results = data.get("results", [])[:limit]
+
+        return results
+
+    except requests.exceptions.RequestException as e:
+        print(f"❌ TMDb API error: {e}")
+        return []
+
+    except Exception as e:
+        print(f"❌ Unexpected TMDb error: {e}")
+        return []
+
