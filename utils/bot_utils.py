@@ -45,7 +45,22 @@ class NoneOfTheseButton(discord.ui.Button):
             return
 
         # 🧠 Enrich TMDb results into your Mongo-style dicts
-        fallback_docs = [convert_tmdb_to_doc(m) for m in tmdb_results]
+        fallback_docs = []
+
+        for m in tmdb_results:
+            doc = convert_tmdb_to_doc(m)
+
+            # Check if the movie already exists by TMDb ID
+            existing = self.movies_collection.find_one({"_id": doc["_id"]})
+
+            if not existing:
+                inserted = self.movies_collection.insert_one(doc)
+                doc["_id"] = inserted.inserted_id  # Mongo might overwrite _id if it was a collision
+            else:
+                doc["_id"] = existing["_id"]  # Reuse the one already in the DB
+
+            fallback_docs.append(doc)
+
 
         # 🎬 Send new view + embed
         embed = discord.Embed(
